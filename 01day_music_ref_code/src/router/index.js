@@ -13,7 +13,7 @@ Vue.use(VueRouter);
 
 // 2. 定义路由:每个路由应该映射一个组件。
 const routes = [
-    {path:'/',redirect:'/recommend'},
+    { path:'/',redirect:'/recommend'},
     { path: '/recommend', component: Recommend },
     { path: '/rank', component: Rank },
     { path: '/singer', component: Singer },

@@ -1,6 +1,7 @@
 <template>
     <div class="recommend">
-        <scroll class="recommend-content">
+        <scroll class="recommend-content"
+        :data="dissList">
             <div>
                 <div class="slider-wrapper" v-if="recommends.length">
                     <slider :loop="true">
@@ -14,9 +15,9 @@
                 <div class="recommend-list">
                     <h1 class="list-title">热门歌单推荐</h1>
                     <ul>
-                        <li v-for="item in dissList" class="item">
+                        <li v-for="item in dissList" class="item" @click="fn(item.dissname)">
                             <div class="icon">
-                                <img :src="item.imgurl" width="60" height="60">
+                                <img v-lazy="item.imgurl" width="60" height="60">
                             </div>
                             <div class="text">
                                 <h2 class="name" v-html="item.creator.name"></h2>
@@ -25,6 +26,9 @@
                         </li>
                     </ul>
                 </div>
+            </div>
+            <div class="loading-container" v-show="!dissList.length">
+                <loading></loading>
             </div>
         </scroll>
     </div>
@@ -36,6 +40,7 @@
     import axios from "axios";
     import Slider from "../../base/slider/slider"
     import Scroll from "../../base/scroll/scroll"
+    import Loading from "../../base/loading/loading"
     export default {
         data(){
             return {
@@ -44,32 +49,36 @@
             }
         },
         methods:{
-
+            getRecommends:function(){
+                //获取轮播图数据
+                this.$http.jsonp(url,{
+                    params,
+                    "jsonp":callback
+                }).then((res)=>{
+                    if(res.body.code==ERR_OK){
+                        console.log(res.body.data.slider);
+                        this.recommends = res.body.data.slider;
+                        this.getDissList();
+                    }
+                });
+            },
+            getDissList:function(){
+                //获取分类歌单数据
+                axios.get(dissListUrl).then((res)=>{
+                    if(res.data.code==ERR_OK){
+                        // console.log(res.data.data.list)
+                        this.dissList = res.data.data.list;
+                    }
+                })
+            }
         },
         components:{
             Slider,
-            Scroll
+            Scroll,
+            Loading
         },
         created:function(){
-            //获取轮播图数据
-            this.$http.jsonp(url,{
-                params,
-                "jsonp":callback
-            }).then((res)=>{
-                if(res.body.code==ERR_OK){
-                    console.log(res.body.data.slider);
-                    this.recommends = res.body.data.slider;
-                }
-            });
-            //获取分类歌单数据
-            axios.get(dissListUrl).then((res)=>{
-                if(res.data.code==ERR_OK){
-                    // console.log(res.data.data.list)
-                    this.dissList = res.data.data.list;
-                }
-            })
-
-
+            this.getRecommends();
         }
     }
 </script>
