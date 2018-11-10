@@ -4,6 +4,7 @@
 * * 创建的项目，Vue 已经下好在本地，所以，通过 import Vue from "vue"; 引入
 * * form 后面没有指明具体的路径，就去 node_modules 文件夹下找。具体路径如下：
 * * music\node_modules\vue\dist\vue.js
+* 
 */
 import Vue from "vue";
 import App from "./App.vue";
