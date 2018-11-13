@@ -9,6 +9,7 @@
 </template>
 
 <script>
+// export default {} 花括号的内容为空，表示什么都不导出
     export default {}
 </script>
 

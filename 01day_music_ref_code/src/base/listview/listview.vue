@@ -134,6 +134,12 @@
             scrollY(newY){
                 //检测当前滑动的距离，根据滑动的距离计算出当前的index
                 const listHeight = this.listHeight;//24(0-+23)
+                //当滚动到上部，newY>0
+                if(newY>0){
+                    this.currentIndex = 0;
+                    return;
+                }
+                //在中间滚动
                 for(let i=0;i<listHeight.length-1;i++){
                     let startHeight = listHeight[i];
                     let endHeight = listHeight[i+1];
@@ -144,6 +150,9 @@
                         return;
                     }
                 }
+                //当滚动到底部，-newY肯定大于最后一个元素的上限
+                this.currentIndex = listHeight.length-2;
+
             },
             diff(newVal){
                 //观测下一个分组距离顶部的距离
