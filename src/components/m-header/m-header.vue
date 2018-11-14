@@ -9,7 +9,7 @@
 </template>
 
 <script>
-// export default {} 花括号的内容为空，表示什么都不导出
+// export default {} 花括号的内容为空，表示什么都不导出，即不导出这个组件中的变量、对象、函数等内容
     export default {}
 </script>
 

@@ -28,6 +28,7 @@ export default {
 
         },
         _play(){
+            // 下一张
 
         }
     },

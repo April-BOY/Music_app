@@ -4,7 +4,9 @@ const axios = require('axios');
 const app = express();
 const apiRouter = express.Router();
 
+// 获取分类歌单的数据
 apiRouter.get('/getDissList',(req,res) =>{
+    // 允许全部的请求都可以跨域
     res.setHeader('Access-Control-Allow-Origin','*');
     axios({
         methods:'get',
