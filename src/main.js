@@ -31,11 +31,26 @@ import App from "./App.vue";
  */
 import router from "./router/index.js";
 import "./common/stylus/index.styl";
+/**
+* ! 在 main.js 中引入包的话，则项目中所有的 vue 实例都可以使用这个包自带的方法和属性
+* * 比如，这里引入的 vue-resource 包，它自带的方法 $http 就可以在所有的 vue 实例中使用
+* *
+*/
+/**
+* * vue-resource 插件用于请求轮播图的数据
+* * 因为 vue-resource 是总体的包
+*/
+import VueResource from "vue-resource";
+Vue.use(VueResource);
 
 
 new Vue({
   el: "#app",
   router,
-  // 将引入的最大组件 App，渲染到页面中
+  /**
+  * * 将引入的最大组件 App，渲染到页面中
+  * * h 相当于 createElement() 函数
+  * *
+  */
   render: h => h(App)
 });

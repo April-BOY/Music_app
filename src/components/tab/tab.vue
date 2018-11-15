@@ -1,3 +1,4 @@
+// 音乐App的tab栏
 <template>
     <!-- <div class="tab">
         <a href="#/recommend" class="tab-item">
@@ -53,6 +54,7 @@ export default {};
         }
 
         &.router-link-active {
+            // 点击时的高亮的颜色
             .tab-link {
                 color: $color-theme;
                 border-bottom: 2px solid $color-theme;
