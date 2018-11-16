@@ -6,7 +6,7 @@
             <slot></slot>
         </div>
         <div class="dots">
-            <span class="dot" v-for="(item,index) in dots" :key="index"></span>
+            <span :class="['dot',{'active':index == currentPageIndex}]" v-for="(item,index) in dots" :key="index"></span>
         </div>
     </div>
 </template>
@@ -19,6 +19,8 @@
 * * (3)初始化小圆点
 * * (4)小圆点跟随高亮的效果
 * *     判断当前是哪副图，然后加上高亮的 css 样式的类名
+* * (5)播放下一张
+* * (6)自动轮播
 */
 import BScroll from "better-scroll";
 export default {
@@ -52,8 +54,8 @@ export default {
         * * 所以，这里需要设置 sliderGroup 的宽度为所有图片的宽度的总和，做成一个长容器
         * *
         */
-        _setSliderWidth(){
-            // 获取容器中所有的图片节点，并将节点绑定到 vue 实例上，这样 vue 实例的所有方法都可以使用这些图片节点了
+        _setSliderWidth(resize){
+            //! 获取容器中所有的图片节点，并将节点绑定到 vue 实例上，这样 vue 实例的所有方法都可以使用这些图片节点了
             this.children = this.$refs.sliderGroup.children;
             // 长容器 sliderGroup 总的宽度初始化为 0，因为这是要计算出来的
             let width = 0;
@@ -72,7 +74,7 @@ export default {
             * * 这就导致了宽度不够.
             * * 因此，需要当无缝滚动时，需要多加两张图片的宽度
             */
-            if(this.loop){
+            if(this.loop&&!resize){
                 width += 2*sliderWidth;
             }
             this.$refs.sliderGroup.style.width = width+"px";
@@ -83,13 +85,16 @@ export default {
                             这里使用的是短容器 slider，这是 better-scroll 插件的文档要求这样写的,具体查看文档的 _initSlide() 方法
                             https://github.com/ustbhuangyi/better-scroll/blob/master/example/components/slide/slide.vue
             * @param {Boolean} loop 是否无缝滚动
+            * !param {Object} slider slider 是通过 new BScroll() 构建的 better-scroll
+            * !                       的一个实例，不是 vue 实例，但通过 this 将其添加为 vue
+            * !                       实例的一个属性，这样，就可以在这个组件中的其他地方使用
             * @function _initSlider
             * @version 1.0.0
             * @author 张瀚
             * @update 2018 November Thu 19:18:12
             */
         _initSlider(){
-            new BScroll(this.$refs.slider,{
+            this.slider = new BScroll(this.$refs.slider,{
                 //因为需求是横向轮播，所以设 scrollX 为真
                 scrollX:true,
                 snap:{
@@ -98,8 +103,30 @@ export default {
                 momentum:false,
                 click:true
             });
+            /**
+            * * scrollEnd 这是 better-scroll 插件自己封装的事件
+            * * on 是 better-scroll 插件自己封装的方法
+            * * https://ustbhuangyi.github.io/better-scroll/doc/zh-hans/events.html#scrollend
+            * *
+            * * getCurrentPage() 是 better-scroll 封装的方法
+            * * 文档:https://ustbhuangyi.github.io/better-scroll/doc/zh-hans/api-specific.html#getcurrentpage 结合例子：
+            * * https://github.com/ustbhuangyi/better-scroll/blob/master/example/components/slide/slide.vue 中的 _onScrollEnd()
+            * * 确定使用 getCurrentPage() 方法获取当前图片的索引
+            * *
+            */
             this.slider.on('scrollEnd',()=>{
+                // 实现小圆点跟随功能
+                /**
+                * * 设置宽度_setSliderWidth()的时候，不需要更新索引
+                * * 初始化轮播图的时候，需要更新索引，但是，
+                * * 当滚动结束的时候，更新(获取)图片的索引更合适，所以，写在这里
+                */
                 this.currentPageIndex = this.slider.getCurrentPage().pageX;
+                // 实现自动轮播功能
+                if(this.autoPlay){
+                    clearTimeout(this.timer);
+                    this._play();
+                }
             });
         },
         _initDots(){
@@ -111,8 +138,12 @@ export default {
             }
         },
         _play(){
-            // 下一张
-
+            // 通过 better-scroll 的 next() 方法实现播放下一张的功能
+            // 这是 better-scroll 插件的文档要求这样写的,具体查看文档的 _play() 方法
+            clearTimeout(this.timer);
+            this.timer = setTimeout(() => {
+                this.slider.next();
+            }, this.interval);
         }
     },
      /**
@@ -142,6 +173,35 @@ export default {
             this._setSliderWidth();
             this._initSlider();
             this._initDots();
+            if(this.autoPlay){
+                this._play();
+            };
+            /**
+            * ! 解决当页面的大小发生变化时，轮播图图片大小没有响应式的变化的问题
+            * * refresh() 是 better-scroll 封装的方法
+            * * https://ustbhuangyi.github.io/better-scroll/doc/zh-hans/api.html#refresh
+            * 
+            * ! 解决页面变化后长容器多出来两个图片宽度的bug：
+            * * this._setSliderWidth(true);里的实参 true 是给 resize 形参赋的值。
+            * * 因为当页面大小发生变化时，才会执行监听，然后，才会去执行this._setSliderWidth(true);进行赋值
+            * * 
+            * * 所以，当页面刚加载时，this._setSliderWidth(true);不会执行，不会给 resize 赋值
+            * * 因此，if(this.loop&&!resize) 这里的条件为 true，只会增加无缝轮播需要的两张图片的宽度.
+            * * 
+            * * 当页面大小发生变化时，this._setSliderWidth(true);执行，给 resize 赋值为 true
+            * * 因此，if(this.loop&&!resize) 这里的条件为 false，不会在增加了无缝轮播需要的两张图片的宽度的基础上再增加两张图片的宽度
+            */
+            window.addEventListener('resize',()=>{
+                // 如果当前的 DOM 结构不存在，即还没有生成，则什么都不做，即 return。否则，就执行后面的内容
+                if(!this.slider){
+                    return;
+                }
+                this._setSliderWidth(true);
+                this.slider.refresh();
+            });
+    },
+    destroyed(){
+        clearTimeout(this.timer);
     }
 }
 </script>

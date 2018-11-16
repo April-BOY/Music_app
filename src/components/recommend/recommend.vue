@@ -53,7 +53,7 @@ export default {
         }).then((res)=>{
             /**
             * * vue-resource 要求在 body 中处理返回的数据
-            * * console.log(res.body.data.slider);
+            * * console.log(res.body);
             * *
             */
             this.recommends = res.body.data.slider;

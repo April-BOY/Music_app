@@ -1,4 +1,4 @@
-// 获取推荐页数据的接口，包括轮播图数据
+// 获取轮播图数据的接口
 // 请求地址
 export const url = "https://c.y.qq.com/musichall/fcgi-bin/fcg_yqqhomepagerecommend.fcg";
 // 请求的参数：这些请求参数是在qq音乐的请求接口中复制粘贴过来的
