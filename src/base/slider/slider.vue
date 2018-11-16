@@ -95,7 +95,7 @@ export default {
             */
         _initSlider(){
             this.slider = new BScroll(this.$refs.slider,{
-                //因为需求是横向轮播，所以设 scrollX 为真
+                //better-scroll 插件默认是竖向滚动。因为需求是横向轮播，所以设 scrollX 为真
                 scrollX:true,
                 snap:{
                     loop:this.loop
