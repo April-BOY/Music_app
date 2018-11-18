@@ -33,7 +33,7 @@ export default {
             type:Boolean,
             default:false
         },
-        //! 用户做懒加载等其他可能导致数据不断变化，可能就会导致滚动的效果异常
+        //! 用户做懒加载等其他可能导致数据不断变化的效果时，可能就会导致滚动的效果异常
         //! 所以，这里就创建一个 data 属性，让用户将需要滚动的内容传进来，只对这部分内容进行滚动
         data:{
             type:Array,
@@ -99,11 +99,26 @@ export default {
         }
     },
     mounted(){
-        this._initScroll();
+        /**
+        * ! 可能会有dom操作的都可以加上$nextTick()方法
+        * *
+        * *
+        */
+        this.$nextTick(()=>{
+            this._initScroll();
+        });
     },
     watch:{
+        /**
+        * * 这里的 data 是 props 中的 data 属性，原来的写法是：data:function(){}
+        * * ES6 的写法则是 data(){}.
+        * ! 这里的含义是：通过Vue实例的watch属性，监听data属性的变化，一旦发生变化，
+        * ! 就执行后面的的回调函数，就发生变化后，要做的动作
+        */
         data(){
-            
+            this.$nextTick(()=>{
+                this.refresh();
+            });
         }
     }
 }
